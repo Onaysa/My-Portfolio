@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive 3D Animation</title>
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.8/css/all.css"
+    integrity="sha384-3AB7yXWz4OeoZcPbieVW64vVXEwADiYyAEhwilzWsLw+9FgqpyjjStpPnpBO8o8S" crossorigin="anonymous">
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&display=swap" rel="stylesheet">
+
+
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            line-height: 1.5;
+            box-sizing: border-box;
+            overflow-x: hidden;
+        }
+        .logo {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            width: 100px;
+            height: auto;
+            z-index: 10;
+            background-color: transparent;
+        }
+        .spline-container {
+         position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            transform-origin: top;
+            transition: transform 1.5s ease, opacity 1.5s ease;
+        }
+        .spline-container.scrolled {
+            transform: scale(0.8) translateY(-30%);
+            opacity: 0.6;
+        }
+        .welcome-text {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            transform: translateY(-50%);
+            font-size: 4rem;
+            font-weight: 2500;
+            color: black;
+            font-family: 'Bebas Neue', sans-serif;
+            text-align: left;
+            z-index: 2;
+            line-height: 1.2;
+            font-weight: bold;
+        }
+        .welcome-text span {
+            display: block;
+            opacity: 0;
+            transform: translateX(-100px);
+            animation: slideIn 1s ease forwards;
+        }
+        .welcome-text span:nth-child(1) {
+            animation-delay: 0.3s;
+        }
+        .welcome-text span:nth-child(2) {
+            animation-delay: 0.6s;
+        }
+        .welcome-text span:nth-child(3) {
+            animation-delay: 0.9s;
+        }
+        .welcome-text span:nth-child(4) {
+            animation-delay: 1.2s;
+        }
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+
+
+        
+        .spline-second {
+         position: absolute;
+            top: 110vh;
+            left: 0;
+            width: 103%;
+            height: 50%;
+            background-color: black;
+            transform-origin: bottom;
+            transition: transform 1.5s ease, opacity 1.5s ease;
+        }
+        .spline-second.scrolled {
+            transform: scale(1.2) translateY(-20%);
+            opacity: 1;
+        }
+        .glass-box {
+            position: absolute;
+            bottom: 20%;
+            left: 71%;
+            transform: translateX(-50%);
+            background: rgba(255, 255, 255, 0.1);
+            width: 25%;
+            height: 70%;
+            border-radius: 10px;
+            z-index: 2;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            padding: 20px;
+            box-sizing: border-box;
+        }
+        .glass-box .text-content {
+            font-family: 'DM Sans', sans-serif;
+            font-size: 1rem;
+            font-weight: 400;
+            text-align: left;
+            line-height: 1.4;
+            color: white;
+        }
+        .glass-box .text-content span {
+            display: block;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 25px;
+            text-align: left;
+            background: linear-gradient(145deg, #444444, #ffffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-left: -3px;
+        }
+        .personal-image {
+            position: absolute;
+            bottom: 72%;
+            left: 80%;
+            transform: translateX(-50%);
+            width: 125px;
+            height: 120px;
+            border-radius: 50%;
+            z-index: 3;
+            backdrop-filter: blur(10px); /* Glass blur effect */
+            -webkit-backdrop-filter: blur(10px); /* For Safari */
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Optional shadow */
+            z-index: 3;
+        }
+
+
+/* Work section styling */
+.work-section {
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 210vh; /* Push below the two spline sections */
+    height: auto; /* Adjusts dynamically to fit content */
+    background-color: #f4f4f4; /* Matches the page background */
+    margin-bottom: 30vh;
+    gap: 90px;
+}
+
+/* iPhone container styles */
+.iphone-container {
+  
+    text-decoration: none;
+    transition: transform 0.3s ease;
+    margin-top: -300px;
+    height: 10%;
+}
+
+/* Hover effect for the iPhones */
+.iphone-container:hover {
+    transform: scale(1.05); /* Slightly enlarge on hover */
+}
+
+/* iPhone frame styles */
+.iphone-frame {
+    margin: 0; 
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .iphone-frame {
+        width: 200px; /* Adjust size for small screens */
+    }
+}
+
+
+/* Transition Overlay */
+.transition-overlay {
+    position: fixed;
+    top: 100%; /* Start below the screen */
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #000; /* Solid dark background */
+    z-index: 9999; /* Above all content */
+    transform: translateY(0); /* Default off-screen position */
+    transition: transform 0.4s ease-in-out; /* Smooth slide animation */
+}
+
+/* Active state for the overlay */
+.transition-overlay.active {
+    transform: translateY(-100%); /* Slide up over the screen */
+}
+
+/* Reverse animation for back navigation */
+.transition-overlay.reverse {
+    transform: translateY(0); /* Slide down to uncover the screen */
+    transition: transform 0.4s ease-in-out;
+}
+
+
+/* Styling for "Projects" background text */
+.projects-background {
+    position: absolute;
+    top: -160%; /* Adjust to vertically center behind iPhone frames */
+    left: 50%; /* Center horizontally */
+   
+    transform: translate(-50%, -50%); /* Perfect centering */
+    font-size: 24rem; /* Adjust font size as needed */
+    font-weight: bold;
+    color: rgba(221, 0, 0, 0.123); /* Light black for a subtle background effect */
+    z-index: 1; /* Behind the iPhone frames */
+    text-align: center;
+    pointer-events: none; /* Makes the text unclickable */
+}
+   
+       
+        /* Adjust Contact Section */
+.contact-section {
+    position: relative;
+    width: 100%;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin-top: 50px; /* Small gap for breathing room */
+}
+        .contact-spline {
+            top: 50%;
+            left: 80%; /* Pushes the 3D image to the right */
+            width: 120%;
+            height: 115%;
+            z-index: 1;
+        }
+        .contact-text {
+    position: absolute;
+    top: 30%; /* Centers the text vertically */
+    left: 50%; /* Centers the text horizontally */
+    transform: translate(-50%, -50%);
+    font-size: 13rem; /* Adjust text size */
+    font-weight: bold;
+    color: white;
+    text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.5);
+    z-index: 2;
+    text-align: center;
+    white-space: nowrap; /* Prevent text wrapping */
+}
+
+       /* LinkedIn link styles */
+.linkedin-link {
+    display: flex; /* Align icon properly */
+    justify-content: center;
+    align-items: center;
+    height: 100%; /* Stretch to fill the glass-rect */
+    color: rgba(255, 255, 255, 0.8); /* Subtle white color */
+    font-size: 1.5rem; /* Adjust size of icon */
+    text-decoration: none; /* Remove underline */
+    transition: color 0.3s ease;
+}
+
+/* LinkedIn icon hover effect */
+.linkedin-link:hover {
+    color: #0a66c2; /* LinkedIn blue */
+}
+
+/* Ensure the glass-rect can contain the link */
+.glass-rect {
+    display: flex; /* Allow child items to align */
+    justify-content: center;
+    align-items: center;
+    position: absolute;
+    width: 65%; /* Adjust width as needed */
+    height: 25px; /* Height for the thin rectangle */
+    background: rgba(255, 255, 255, 0.1); /* Glass effect */
+    border-radius: 5px;
+    backdrop-filter: blur(15px);
+    -webkit-backdrop-filter: blur(15px);
+    z-index: 2;
+    left: 50%; /* Center horizontally */
+    transform: translateX(-50%);
+    margin-top: 48px;
+}
+
+        
+        .glass-rect-bottom {
+            top: 40%; /* Adjust this to place below the text */
+        }
+        html {
+            margin: 0;
+            padding: 0;
+            scroll-behavior: smooth;
+        }
+/* Styling for LinkedIn icon container */
+.linkedin-icon {
+    position: absolute;
+    bottom: 10%; /* Position at the bottom of the glass box */
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    width: 100%;
+    color: var(--white-light);
+}
+
+/* Styling for the LinkedIn link */
+.linkedin-link {
+    text-decoration: none; /* Remove underline */
+    
+    font-size: 2rem; /* Adjust icon size */
+    transition: color 0.3s ease;
+    color: var(--white-light);
+}
+
+
+
+/* LinkedIn icon link */
+.icon-linkedin {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-decoration: none; /* Remove underline */
+    color: black; /* Set default icon color to white */
+    font-size: 4rem; /* Adjust icon size */
+    height: 350%; /* Align within glass-rect */
+    transition: color 0.3s ease;
+}
+
+/* Hover effect for the LinkedIn icon */
+.icon-linkedin:hover {
+    color: #0a66c2; /* LinkedIn blue on hover */
+}
+        .copyright {
+    margin-top: 20px;
+    text-align: center;
+    color: white;
+}
+
+    </style>
+</head>
+<body>
+    <img src="images/bimbim3-removebg-preview.png" alt="Logo" class="logo">
+    <div class="spline-container" id="spline-container">
+        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.58/build/spline-viewer.js"></script>
+        <spline-viewer url="https://prod.spline.design/cJW24bTGcBZGp37u/scene.splinecode"></spline-viewer>
+        <div class="welcome-text">
+            <span>Welcome</span>
+            <span>to</span>
+            <span>Anisa's</span>
+            <span>Portfolio</span>
+        </div>
+        
+    </div>
+    <div class="spline-second" id="spline-second">
+        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>
+<spline-viewer url="https://prod.spline.design/P0dN9HIWstXFUrfv/scene.splinecode"></spline-viewer>
+        <img src="images/me.png" alt="Your Image" class="personal-image">
+        <div class="glass-box">
+            <div class="text-content">
+                <span>A little about me:</span>
+                I am passionate about UI/UX design and enjoy crafting interactive experiences that delight users. 
+                <br><br>
+                My ultimate goal is to contribute to projects that promote inclusivity and accessibility, ensuring that everyone can enjoy the benefits of thoughtful design.
+            </div>
+        </div>
+        
+    </div>
+   
+    <div class="transition-overlay"></div> <!-- Overlay for transitions -->
+    
+    <!-- Main Content -->
+    <div class="work-section">
+
+        <h1 class="projects-background">Projects</h1>
+        <!-- iPhone Frame 1 -->
+        <a href="https://onaysa.github.io/Food-recipe-s-API/" class="iphone-container">
+            <img src="images/foddd.jpeg" alt="iPhone Frame 1" class="iphone-frame">
+        </a>
+
+        <!-- iPhone Frame 2 -->
+        <a href="https://onaysa.github.io/Travel-guide/" class="iphone-container">
+            <img src="images/travelll.jpeg" alt="iPhone Frame 2" class="iphone-frame">
+        </a>
+    </div>
+    
+
+    
+   
+    <div class="contact-section">
+        <script type="module" src="https://unpkg.com/@splinetool/viewer@1.9.59/build/spline-viewer.js"></script>
+        <spline-viewer 
+            url="https://prod.spline.design/ChtjGh-K6OBCpD6a/scene.splinecode"
+            class="contact-spline"></spline-viewer>
+        <h1 class="contact-text">Contact me</h1>
+        <div class="glass-rect glass-rect-bottom">
+            <a href="https://www.linkedin.com/in/anisa-ali-01a8b4226/" target="_blank" class="icon-linkedin">
+                <i class="fab fa-linkedin"></i>
+            </a>
+        </div>
+    </div>
+    
+    
+    
+    
+    <script>
+        window.addEventListener('scroll', () => {
+            const splineContainer = document.getElementById('spline-container');
+            const splineSecond = document.getElementById('spline-second');
+            const glassBox = document.querySelector('.glass-box');
+
+            if (window.scrollY > 100) {
+                splineContainer.classList.add('scrolled');
+                splineSecond.classList.add('scrolled');
+                glassBox.classList.add('scrolled');
+            } else {
+                splineContainer.classList.remove('scrolled');
+                splineSecond.classList.remove('scrolled');
+                glassBox.classList.remove('scrolled');
+            }
+            
+        });
+         // Function to check if an element is in the viewport
+    function isInViewport(element) {
+        const rect = element.getBoundingClientRect();
+        return (
+            rect.top <= (window.innerHeight || document.documentElement.clientHeight) &&
+            rect.bottom >= 0
+        );
+     }
+ 
+
+ 
+     document.querySelectorAll('.iphone-container').forEach((container) => {
+    container.addEventListener('click', (e) => {
+        e.preventDefault(); // Prevent default navigation
+
+        // Get the target URL
+        const href = container.getAttribute('href');
+        console.log('Navigating to:', href); // Debug: Log the URL
+
+        // Navigate directly to the target page
+        window.location.href = href;
+    });
+});
+
+
+
+
+
+
+
+       
+
+    
+
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>
